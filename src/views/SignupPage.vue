@@ -1,11 +1,7 @@
 <template>
 	<div class="signup-container">
 		<h1 class="signup-title">회원가입</h1>
-		<form
-			class="signup-form"
-			@submit.prevent="checkValidation"
-			autocomplete="false"
-		>
+		<form class="signup-form" @submit.prevent="submitForm" autocomplete="false">
 			<div class="signup-form-content">
 				<label for="email">{{ userInfo.email.title }}</label>
 				<input
@@ -19,26 +15,57 @@
 			</div>
 			<div class="signup-form-content">
 				<label for="password">{{ userInfo.password.title }}</label>
-				<input
-					:type="userInfo.password.type"
-					id="password"
-					v-model="userInfo.password.value"
-					@keyup="firstTypedData('password')"
-					placeholder="******"
-				/>
+				<div class="input-container">
+					<input
+						:type="userInfo.password.type"
+						id="password"
+						v-model="userInfo.password.value"
+						@keyup="firstTypedData('password')"
+						placeholder="******"
+					/>
+					<span class="eye-icon-container" @click="toggleType('password')">
+						<img
+							v-if="!isShowPassword('password')"
+							src="@/assets/icons/eye-open.svg"
+							alt="show password button"
+						/>
+						<img
+							v-else
+							src="@/assets/icons/eye-close.svg"
+							alt="hide password button"
+						/>
+					</span>
+				</div>
 				<p v-if="!isPasswordValid && isFirstTyped('password')">Error message</p>
 			</div>
 			<div class="signup-form-content">
 				<label for="confirmPassword">{{
 					userInfo.confirmPassword.title
 				}}</label>
-				<input
-					:type="userInfo.confirmPassword.type"
-					id="confirmPassword"
-					v-model="userInfo.confirmPassword.value"
-					@keyup="firstTypedData('confirmPassword')"
-					placeholder="******"
-				/>
+				<div class="input-container">
+					<input
+						:type="userInfo.confirmPassword.type"
+						id="confirmPassword"
+						v-model="userInfo.confirmPassword.value"
+						@keyup="firstTypedData('confirmPassword')"
+						placeholder="******"
+					/>
+					<span
+						class="eye-icon-container"
+						@click="toggleType('confirmPassword')"
+					>
+						<img
+							v-if="!isShowPassword('confirmPassword')"
+							src="@/assets/icons/eye-open.svg"
+							alt="show password button"
+						/>
+						<img
+							v-else
+							src="@/assets/icons/eye-close.svg"
+							alt="hide password button"
+						/>
+					</span>
+				</div>
 				<p v-if="!isConfirmedPassword && isFirstTyped('confirmPassword')">
 					Error message
 				</p>
@@ -78,6 +105,11 @@ export default {
 		};
 	},
 	computed: {
+		isShowPassword() {
+			return key => {
+				return this.userInfo[key].type === 'text';
+			};
+		},
 		isFirstTyped() {
 			return key => {
 				return this.userInfo[key].firstTyped;
@@ -109,6 +141,20 @@ export default {
 		firstTypedData(key) {
 			this.userInfo[key].firstTyped = true;
 		},
+		toggleType(key) {
+			const type = this.userInfo[key].type;
+			this.userInfo[key].type = type === 'text' ? 'password' : 'text';
+		},
+		submitForm() {
+			const { email, password, confirmPassword } = this.userInfo;
+			const userData = {
+				email: email.value,
+				password: password.value,
+				confirmPassword: confirmPassword.value,
+			};
+
+			//TODO: request api call
+		},
 	},
 };
 </script>
@@ -117,7 +163,7 @@ export default {
 .signup-container {
 	max-width: 300px;
 	max-height: 600px;
-	border: 1px solid #888;
+	border: 1px solid rgb(226, 226, 226);
 	border-radius: 8px;
 	margin: 4rem auto;
 	padding: 24px;
@@ -148,9 +194,35 @@ export default {
 				color: #3e4042;
 			}
 
+			.input-container {
+				width: 100%;
+				position: relative;
+				margin-top: 4px;
+
+				.eye-icon-container {
+					display: block;
+					width: 15px;
+					height: 15px;
+					position: absolute;
+					top: 50%;
+					right: 13px;
+					transform: translate(0, -50%);
+					cursor: pointer;
+
+					img {
+						display: block;
+						width: 100%;
+						height: 100%;
+					}
+				}
+
+				input {
+					padding-right: 2rem;
+				}
+			}
+
 			input {
 				appearance: none;
-				margin-top: 4px;
 				width: 100%;
 				padding: 13px 12px;
 				height: 48px;
@@ -160,6 +232,10 @@ export default {
 				letter-spacing: -0.3px;
 				border-radius: 4px;
 				background-color: #fff;
+
+				&[id='email'] {
+					margin-top: 4px;
+				}
 
 				&:focus {
 					border-color: #4c68d7;
